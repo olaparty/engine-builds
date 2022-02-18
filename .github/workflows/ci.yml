@@ -13,12 +13,12 @@ jobs:
         config:
         # Debug builds not needed: fetched from Google
 
-        - tag: host_profile
+        - tag: android_profile
           gn: --android --runtime-mode profile --lto
           host: ubuntu-latest
           host_tag: linux_x64
 
-        - tag: host_release
+        - tag: android_release
           gn: --android --runtime-mode release --lto --stripped
           host: ubuntu-latest
           host_tag: linux_x64

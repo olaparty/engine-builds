@@ -1,0 +1,49 @@
+# Copyright 2013 The Flutter Authors. All rights reserved.
+# Use of this source code is governed by a BSD-style license that can be
+# found in the LICENSE file.
+
+import("//flutter/common/config.gni")
+
+# Whether to build the dartdevc sdk, libraries, and source files
+# required for the flutter web sdk.
+declare_args() {
+  full_dart_sdk = false
+}
+
+group("flutter") {
+  testonly = true
+
+  public_deps = [
+    "//flutter/lib/snapshot:generate_snapshot_bin",
+    "//flutter/lib/snapshot:kernel_platform_files",
+    "//flutter/shell/platform/embedder:flutter_engine",
+  ]
+
+  if (current_toolchain == host_toolchain) {
+    public_deps += [
+      "//flutter/flutter_frontend_server:frontend_server",
+      "//third_party/dart:create_sdk",
+    ]
+  }
+}
+
+config("config") {
+  include_dirs = [ ".." ]
+  if (is_win) {
+    if (current_cpu != "x86") {
+      cflags = [ "/WX" ]  # Treat warnings as errors.
+    }
+  }
+}
+
+config("export_dynamic_symbols") {
+
+}
+
+group("dist") {
+  testonly = true
+
+  deps = [
+    "//flutter/sky/dist",
+  ]
+}

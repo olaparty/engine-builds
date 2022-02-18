@@ -1,0 +1,155 @@
+name: Flutter Engine
+
+
+on:
+  workflow_dispatch:
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        channel: [stable] # master
+        config:
+        # Debug builds not needed: fetched from Google
+
+        - tag: host_profile
+          gn: --embedder-for-target --runtime-mode profile --lto
+          host: ubuntu-latest
+          host_tag: linux_x64
+        - tag: host_profile
+          gn: --embedder-for-target --runtime-mode profile --lto
+          host: macos-latest
+          host_tag: macosx_x64
+
+
+        - tag: host_release
+          gn: --embedder-for-target --runtime-mode release --lto --stripped
+          host: ubuntu-latest
+          host_tag: linux_x64
+        - tag: host_release
+          gn: --embedder-for-target --runtime-mode release --lto --stripped
+          host: macos-latest
+          host_tag: macosx_x64
+
+    runs-on: ${{ matrix.config.host }}
+
+    env:
+      DEPOT_TOOLS_WIN_TOOLCHAIN: 0
+      PYTHONIOENCODING: utf-8
+      PYTHONLEGACYWINDOWSSTDIO: utf-8
+
+    steps:
+    - name: Free up space
+      if: matrix.config.host == 'ubuntu-latest'
+      run: |
+        pwd
+        sudo df -h
+        sudo find /opt -maxdepth 1 ! -name hostedtoolcache ! -name opt | sudo xargs rm -rf
+        sudo rm -rf /usr/share/dotnet
+        sudo df -h
+
+    - name: Get engine version
+      id: get_engine_version
+      run: |
+        value=`curl https://raw.githubusercontent.com/flutter/flutter/${{ matrix.channel }}/bin/internal/engine.version`
+        echo ::set-output name=engine_version::$value
+      shell: bash
+
+    - name: Create release
+      if: github.event_name != 'pull_request'
+      continue-on-error: true
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
+      with:
+        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}
+        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}
+
+    - name: Check release
+      if: github.event_name != 'pull_request'
+      id: release_check
+      run: |
+        url="https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/f-${{ steps.get_engine_version.outputs.engine_version }}"
+        header="Authorization: token ${{ secrets.PERMANENT_GITHUB_TOKEN }}"
+
+        content=`curl --header "$header" $url`
+        echo $content
+
+        assets=`echo $content | jq .assets[].name`
+        echo $assets
+
+        if echo $assets | grep -q ${{ matrix.config.host_tag }}-${{ matrix.config.tag }}.zip
+        then
+          echo Skipping build
+          echo ::set-output name=skip_build::true
+        fi
+      shell: bash
+
+    - name: Checkout
+      if: steps.release_check.outputs.skip_build != 'true' 
+      uses: actions/checkout@v1
+
+    - name: Install Python 2.x
+      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host != 'macos-latest'
+      uses: actions/setup-python@v1
+      with:
+        python-version: '2.x'
+
+    - name: Install dependencies (ubuntu)
+      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'ubuntu-latest'
+      run: sudo apt-get install patch tree zip
+
+    - name: Install dependencies (macos)
+      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'macos-latest'
+      run: brew install binutils gpatch tree
+
+    - name: Install depot tools
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: ./fetch-depot-tools.sh
+      shell: bash
+
+    - name: Download engine (macos + ubuntu)
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: ./fetch-engine.sh ${{ steps.get_engine_version.outputs.engine_version }}
+      shell: bash
+
+    - name: Patch
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: ./patch-engine.sh
+      shell: bash
+
+    - name: Generate config
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: ./gn.sh ${{ matrix.config.gn }}
+      shell: bash
+
+    - name: Build
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: ./build.sh ${{ matrix.config.tag }}
+      shell: bash
+
+    - name: Print out tree
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: tree ./engine/src/out/
+      shell: bash
+
+    - name: Print release tree
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: tree ./engine_out/
+      shell: bash
+
+    - name: Create release zip
+      if: steps.release_check.outputs.skip_build != 'true' 
+      run: cd engine_out && zip -qq -r ../${{ matrix.config.host_tag }}-${{ matrix.config.tag }}.zip ./*
+      shell: bash
+
+    - name: Upload release asset
+      if: steps.release_check.outputs.skip_build != 'true' && github.event_name != 'pull_request' 
+      uses: softprops/action-gh-release@master
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
+      with:
+        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}
+        name: Flutter ${{ steps.get_engine_version.outputs.engine_version }}
+        files: ${{ matrix.config.host_tag }}-${{ matrix.config.tag }}.zip

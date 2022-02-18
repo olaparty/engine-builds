@@ -14,23 +14,14 @@ jobs:
         # Debug builds not needed: fetched from Google
 
         - tag: host_profile
-          gn: --embedder-for-target --runtime-mode profile --lto
+          gn: --android --runtime-mode profile --lto
           host: ubuntu-latest
           host_tag: linux_x64
-        - tag: host_profile
-          gn: --embedder-for-target --runtime-mode profile --lto
-          host: macos-latest
-          host_tag: macosx_x64
-
 
         - tag: host_release
-          gn: --embedder-for-target --runtime-mode release --lto --stripped
+          gn: --android --runtime-mode release --lto --stripped
           host: ubuntu-latest
           host_tag: linux_x64
-        - tag: host_release
-          gn: --embedder-for-target --runtime-mode release --lto --stripped
-          host: macos-latest
-          host_tag: macosx_x64
 
     runs-on: ${{ matrix.config.host }}
 

@@ -17,8 +17,9 @@ mkdir -p "${OUT_PATH}/gen"
 export SRC_OUT_PATH="${ENGINE_PATH}/src/out/${TARGET}"
 
 echo Copying other outputs
-cp $SRC_OUT_PATH/libflutter_engine.so $OUT_PATH/libflutter_engine.so ||
-cp $SRC_OUT_PATH/libflutter_engine.dylib $OUT_PATH/libflutter_engine.dylib ||
+ls $SRC_OUT_PATH
+cp $SRC_OUT_PATH/libflutter.so $OUT_PATH/libflutter.so ||
+cp $SRC_OUT_PATH/libflutter.dylib $OUT_PATH/libflutter.dylib ||
 (
   cp $SRC_OUT_PATH/flutter_engine.dll $OUT_PATH/flutter_engine.dll &&
   cp $SRC_OUT_PATH/flutter_engine.dll.lib $OUT_PATH/flutter_engine.lib &&

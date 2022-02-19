@@ -15,13 +15,13 @@ jobs:
 
         - tag: android_profile
           gn: --android --runtime-mode profile --lto
-          host: ubuntu-latest
-          host_tag: linux_x64
+          host: macos-latest
+          host_tag: android_arm64
 
-        - tag: android_release
-          gn: --android --runtime-mode release --lto --stripped
-          host: ubuntu-latest
-          host_tag: linux_x64
+        # - tag: android_release
+        #   gn: --android --runtime-mode release --lto --stripped
+        #   host: macos-latest
+        #   host_tag: android_arm64
 
     runs-on: ${{ matrix.config.host }}
 

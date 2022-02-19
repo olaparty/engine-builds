@@ -9,5 +9,5 @@ set -e
 # INCBIN(Icudtl, \"${PWD}/engine/src/third_party/icu/flutter/icudtl.dat\");
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
-cp 31390.diff engine/src/flutter/
-cd engine/src/flutter && git apply 31390.diff
+# cp 31390.diff engine/src/flutter/
+# cd engine/src/flutter && git apply 31390.diff

@@ -1,4 +1,4 @@
-set -e
+#set -e
 # curl -O https://raw.githubusercontent.com/graphitemaster/incbin/main/incbin.h
 # echo -e "\n" >> incbin.h
 # cp main.gn engine/src/flutter/BUILD.gn
@@ -12,6 +12,6 @@ set -e
 cp 100522.diff engine/src/flutter/
 cd engine/src/flutter 
 
-ls -al
+ls -al shell/gpu
 
-#git apply 100522.diff
+git apply 100522.diff

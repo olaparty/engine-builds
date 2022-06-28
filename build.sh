@@ -23,7 +23,9 @@ echo Copying other outputs
 ls -al
 
 cp $SRC_OUT_PATH/libflutter.so $OUT_PATH/libflutter.so ||
-cp $SRC_OUT_PATH/flutter.framework $OUT_PATH/flutter.framework ||
+cp $SRC_OUT_PATH/Flutter.podspec $OUT_PATH/Flutter.podspec ||
+cp -R $SRC_OUT_PATH/Flutter.framework $OUT_PATH/ ||
+cp -R $SRC_OUT_PATH/Flutter.xcframework $OUT_PATH/ ||
 cp $SRC_OUT_PATH/libflutter.dylib $OUT_PATH/libflutter.dylib ||
 (
   cp $SRC_OUT_PATH/flutter_engine.dll $OUT_PATH/flutter_engine.dll &&

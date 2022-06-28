@@ -10,4 +10,8 @@ set -e
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
 cp 100522.diff engine/src/flutter/
-cd engine/src/flutter && git apply 100522.diff
+cd engine/src/flutter 
+
+ls -al
+
+#git apply 100522.diff

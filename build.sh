@@ -20,7 +20,10 @@ export SRC_OUT_PATH="${ENGINE_PATH}/src/out/${TARGET}"
 
 echo Copying other outputs
 
+ls -al
+
 cp $SRC_OUT_PATH/libflutter.so $OUT_PATH/libflutter.so ||
+cp $SRC_OUT_PATH/flutter.framework $OUT_PATH/flutter.framework ||
 cp $SRC_OUT_PATH/libflutter.dylib $OUT_PATH/libflutter.dylib ||
 (
   cp $SRC_OUT_PATH/flutter_engine.dll $OUT_PATH/flutter_engine.dll &&

@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        channel: [stable] # master
+        channel: [2.10.3] # master
         config:
         # Debug builds not needed: fetched from Google
 

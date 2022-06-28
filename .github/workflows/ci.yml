@@ -12,16 +12,24 @@ jobs:
         channel: [2.10.3] # master
         config:
         # Debug builds not needed: fetched from Google
-
-        - tag: android_profile
-          gn: --android --runtime-mode profile --lto
+        - tag: ios_profile
+          gn: --ios --runtime-mode profile --lto
           host: macos-latest
-          host_tag: android_arm64
+          host_tag: ios_arm64
 
-        - tag: android_release
-          gn: --android --runtime-mode release --lto --stripped
+        - tag: ios_release
+          gn: --ios --runtime-mode release --lto --stripped
           host: macos-latest
-          host_tag: android_arm64
+          host_tag: ios_arm64
+        # - tag: android_profile
+        #   gn: --android --runtime-mode profile --lto
+        #   host: macos-latest
+        #   host_tag: android_arm64
+
+        # - tag: android_release
+        #   gn: --android --runtime-mode release --lto --stripped
+        #   host: macos-latest
+        #   host_tag: android_arm64
 
     runs-on: ${{ matrix.config.host }}
 

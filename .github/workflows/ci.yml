@@ -65,25 +65,25 @@ jobs:
         tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}
         release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}
 
-    - name: Check release
-      if: github.event_name != 'pull_request'
-      id: release_check
-      run: |
-        url="https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/f-${{ steps.get_engine_version.outputs.engine_version }}"
-        header="Authorization: token ${{ secrets.PERMANENT_GITHUB_TOKEN }}"
+    # - name: Check release
+    #   if: github.event_name != 'pull_request'
+    #   id: release_check
+    #   run: |
+    #     url="https://api.github.com/repos/$GITHUB_REPOSITORY/releases/tags/f-${{ steps.get_engine_version.outputs.engine_version }}"
+    #     header="Authorization: token ${{ secrets.PERMANENT_GITHUB_TOKEN }}"
 
-        content=`curl --header "$header" $url`
-        echo $content
+    #     content=`curl --header "$header" $url`
+    #     echo $content
 
-        assets=`echo $content | jq .assets[].name`
-        echo $assets
+    #     assets=`echo $content | jq .assets[].name`
+    #     echo $assets
 
-        if echo $assets | grep -q ${{ matrix.config.host_tag }}-${{ matrix.config.tag }}.zip
-        then
-          echo Skipping build
-          echo ::set-output name=skip_build::true
-        fi
-      shell: bash
+    #     if echo $assets | grep -q ${{ matrix.config.host_tag }}-${{ matrix.config.tag }}.zip
+    #     then
+    #       echo Skipping build
+    #       echo ::set-output name=skip_build::true
+    #     fi
+    #   shell: bash
 
     - name: Checkout
       if: steps.release_check.outputs.skip_build != 'true' 

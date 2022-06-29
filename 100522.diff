@@ -1,8 +1,8 @@
 diff --git a/shell/gpu/gpu_surface_metal_skia.h b/shell/gpu/gpu_surface_metal_skia.h
-index d2518df8db46..1628b60098c9 100644
+index 378051b..1950667 100644
 --- a/shell/gpu/gpu_surface_metal_skia.h
 +++ b/shell/gpu/gpu_surface_metal_skia.h
-@@ -38,6 +38,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetalSkia : public Surface {
+@@ -35,6 +35,7 @@ class SK_API_AVAILABLE_CA_METAL_LAYER GPUSurfaceMetalSkia : public Surface {
    // hack to make avoid allocating resources for the root surface when an
    // external view embedder is present.
    bool render_to_surface_ = true;
@@ -11,22 +11,22 @@ index d2518df8db46..1628b60098c9 100644
    // Accumulated damage for each framebuffer; Key is address of underlying
    // MTLTexture for each drawable
 diff --git a/shell/gpu/gpu_surface_metal_skia.mm b/shell/gpu/gpu_surface_metal_skia.mm
-index f308948c2b6d..9ebe7f17c8ed 100644
+index 8dc1e61..ef0c00c 100644
 --- a/shell/gpu/gpu_surface_metal_skia.mm
 +++ b/shell/gpu/gpu_surface_metal_skia.mm
-@@ -54,7 +54,14 @@
+@@ -43,7 +43,14 @@
+     : delegate_(delegate),
        render_target_type_(delegate->GetRenderTargetType()),
        context_(std::move(context)),
-       msaa_samples_(msaa_samples),
 -      render_to_surface_(render_to_surface) {}
 +      render_to_surface_(render_to_surface) {
-+  // If this preference is explicitly set, we allow for disabling partial repaint.
-+  NSNumber* disablePartialRepaint =
-+      [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisablePartialRepaint"];
-+  if (disablePartialRepaint != nil) {
-+    disable_partial_repaint_ = disablePartialRepaint.boolValue;
-+  }
-+}
++        // If this preference is explicitly set, we allow for disabling partial repaint.
++        NSNumber* disablePartialRepaint =
++            [[NSBundle mainBundle] objectForInfoDictionaryKey:@"FLTDisablePartialRepaint"];
++        if (disablePartialRepaint != nil) {
++            disable_partial_repaint_ = disablePartialRepaint.boolValue;
++        }
++      }
  
  GPUSurfaceMetalSkia::~GPUSurfaceMetalSkia() = default;
  

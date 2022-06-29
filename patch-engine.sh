@@ -1,4 +1,4 @@
-#set -e
+set -e
 # curl -O https://raw.githubusercontent.com/graphitemaster/incbin/main/incbin.h
 # echo -e "\n" >> incbin.h
 # cp main.gn engine/src/flutter/BUILD.gn

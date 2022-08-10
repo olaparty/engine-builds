@@ -1,0 +1,20 @@
+diff --git a/shell/platform/android/android_shell_holder.cc b/shell/platform/android/android_shell_holder.cc
+index f425e2041c..70d027210c 100644
+--- a/shell/platform/android/android_shell_holder.cc
++++ b/shell/platform/android/android_shell_holder.cc
+@@ -253,6 +253,15 @@ void AndroidShellHolder::Launch(
+   }
+ 
+   asset_manager_ = asset_manager;
++  auto asset_dir = GetSettings().assets_path;
++  if (asset_dir != null && !asset_dir.empty()) {
++    auto dir_asset_provider = std::make_unique<DirectoryAssetBundle>(
++      fml::OpenDirectory(asset_dir.path().c_str(), false,
++                         fml::FilePermission::kRead),
++      false);
++    asset_manager_.PushFront(std::move(dir_asset_provider));
++  }
++
+   auto config = BuildRunConfiguration(asset_manager, entrypoint, libraryUrl,
+                                       entrypoint_args);
+   if (!config) {

@@ -9,22 +9,23 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        channel: [3.0.3] # master
+        channel: [2.10.3] # master
         config:
         # Debug builds not needed: fetched from Google
-        - tag: ios_profile
-          gn: --ios --runtime-mode profile --lto
-          host: macos-latest
-          host_tag: ios_arm64
-
-        - tag: ios_release
-          gn: --ios --runtime-mode release --lto --stripped
-          host: macos-latest
-          host_tag: ios_arm64
-        # - tag: android_profile
-        #   gn: --android --runtime-mode profile --lto
+        # - tag: ios_profile
+        #   gn: --ios --runtime-mode profile --lto
         #   host: macos-latest
-        #   host_tag: android_arm64
+        #   host_tag: ios_arm64
+
+        # - tag: ios_release
+        #   gn: --ios --runtime-mode release --lto --stripped
+        #   host: macos-latest
+        #   host_tag: ios_arm64
+
+        - tag: android_profile
+          gn: --android --runtime-mode profile --lto
+          host: macos-latest
+          host_tag: android_arm64
 
         # - tag: android_release
         #   gn: --android --runtime-mode release --lto --stripped

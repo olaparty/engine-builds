@@ -157,6 +157,6 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
       with:
-        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}
-        name: Flutter ${{ steps.get_engine_version.outputs.engine_version }}
+        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
+        name: Flutter ${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
         files: ${{ matrix.config.host_tag }}-${{ matrix.config.tag }}.zip

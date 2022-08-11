@@ -22,6 +22,9 @@ echo Copying other outputs
 
 ls -al
 
+#todo: stirp all
+# strip -s $SRC_OUT_PATH/libflutter.so -o $OUT_PATH/libflutter.stripped.so 
+
 cp $SRC_OUT_PATH/libflutter.so $OUT_PATH/libflutter.so ||
 cp $SRC_OUT_PATH/Flutter.podspec $OUT_PATH/Flutter.podspec ||
 cp -R $SRC_OUT_PATH/Flutter.framework $OUT_PATH/ ||

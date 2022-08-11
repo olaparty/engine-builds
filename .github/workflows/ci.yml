@@ -23,7 +23,7 @@ jobs:
         #   host_tag: ios_arm64
 
         - tag: android_profile
-          gn: --android --runtime-mode profile --lto
+          gn: --android --runtime-mode profile --android-cpu=arm64 --unoptimized
           host: macos-latest
           host_tag: android_arm64
 
@@ -55,6 +55,13 @@ jobs:
         value=`curl https://raw.githubusercontent.com/flutter/flutter/${{ matrix.channel }}/bin/internal/engine.version`
         echo ::set-output name=engine_version::$value
       shell: bash
+    
+    - name: Get build time
+      id: get_build_time
+      run: |
+        value=`date +%m-%d-%Y`
+        echo ::set-output name=build_time::$value
+      shell: bash
 
     - name: Create release
       if: github.event_name != 'pull_request'
@@ -63,8 +70,8 @@ jobs:
       env:
         GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
       with:
-        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}
-        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}
+        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
+        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
 
     # - name: Check release
     #   if: github.event_name != 'pull_request'

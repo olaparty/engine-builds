@@ -10,7 +10,7 @@ unset ANDROID_SDK_ROOT
 
 echo "Building $TARGET"
 cd "${ENGINE_PATH}/src"
-ninja -C "out/${TARGET}"
+ninja -C "out/${TARGET}" -j 10
 
 echo "Copying output"
 mkdir -p "${OUT_PATH}/gen"

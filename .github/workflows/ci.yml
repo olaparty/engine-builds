@@ -23,7 +23,7 @@ jobs:
         #   host_tag: ios_arm64
 
         - tag: android_profile_arm64
-          gn: --android --runtime-mode profile --android-cpu=arm64 --stripped
+          gn: --android --runtime-mode profile --android-cpu=arm64 --stripped --no-lto
           host: macos-latest
           host_tag: android_arm64
 

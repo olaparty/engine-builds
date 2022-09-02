@@ -1,28 +1,29 @@
 diff --git a/shell/platform/android/android_shell_holder.cc b/shell/platform/android/android_shell_holder.cc
-index f425e2041c..1655f8c79a 100644
+index 1e5b9e95c0..7b24bb9c40 100644
 --- a/shell/platform/android/android_shell_holder.cc
 +++ b/shell/platform/android/android_shell_holder.cc
-@@ -29,6 +29,7 @@
- #include "flutter/shell/platform/android/android_image_generator.h"
- #include "flutter/shell/platform/android/context/android_context.h"
- #include "flutter/shell/platform/android/platform_view_android.h"
+@@ -16,6 +16,7 @@
+ #include <string>
+ #include <utility>
+ 
 +#include "flutter/assets/directory_asset_bundle.h"
- 
- namespace flutter {
- 
-@@ -253,6 +254,15 @@ void AndroidShellHolder::Launch(
+ #include "flutter/fml/logging.h"
+ #include "flutter/fml/make_copyable.h"
+ #include "flutter/fml/message_loop.h"
+@@ -331,6 +332,16 @@ std::optional<RunConfiguration> AndroidShellHolder::BuildRunConfiguration(
    }
  
-   asset_manager_ = asset_manager;
+   RunConfiguration config(std::move(isolate_configuration));
++  
 +  auto asset_dir = GetSettings().assets_path;
 +  if (!asset_dir.empty()) {
 +    auto dir_asset_provider = std::make_unique<DirectoryAssetBundle>(
 +      fml::OpenDirectory(asset_dir.c_str(), false,
 +                         fml::FilePermission::kRead),
 +      false);
-+    asset_manager_->PushFront(std::move(dir_asset_provider));
++    config.AddAssetResolver(std::move(dir_asset_provider));
 +  }
 +
-   auto config = BuildRunConfiguration(asset_manager, entrypoint, libraryUrl,
-                                       entrypoint_args);
-   if (!config) {
+   config.AddAssetResolver(apk_asset_provider_->Clone());
+ 
+   {

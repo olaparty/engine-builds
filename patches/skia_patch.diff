@@ -1,0 +1,17 @@
+diff --git a/DEPS b/DEPS
+index f830f29953..1490310f9f 100644
+--- a/DEPS
++++ b/DEPS
+@@ -14,10 +14,10 @@ vars = {
+   'flutter_git': 'https://flutter.googlesource.com',
+   'fuchsia_git': 'https://fuchsia.googlesource.com',
+   'github_git': 'https://github.com',
+-  'skia_git': 'https://skia.googlesource.com',
++  'skia_git': 'https://github.com/olaparty/skia',
+   # OCMock is for testing only so there is no google clone
+   'ocmock_git': 'https://github.com/erikdoe/ocmock.git',
+-  'skia_revision': 'e2ba2f5b20e0d188dbfb5d3df64aa9787ebb3f37',
++  'skia_revision': 'd63a7c48901d0320de2a211934bd349210516110',
+ 
+   # WARNING: DO NOT EDIT canvaskit_cipd_instance MANUALLY
+   # See `lib/web_ui/README.md` for how to roll CanvasKit to a new version.

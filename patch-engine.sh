@@ -16,5 +16,9 @@ cd engine/src/flutter
 
 git apply skia_patch.diff
 
-git status
+gclient sync --no-history -r
 
+git status
+cd engine/src/third_party/skia 
+git rev-list --max-parents=0 HEAD
+cd -

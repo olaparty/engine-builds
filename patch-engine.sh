@@ -9,12 +9,12 @@ set -e
 # INCBIN(Icudtl, \"${PWD}/engine/src/third_party/icu/flutter/icudtl.dat\");
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
-cp patches/android_asset_dir.diff engine/src/flutter/
+cp patches/skia_patch.diff engine/src/flutter/
 cd engine/src/flutter 
 
 #ls -al shell/gpu
 
-git apply android_asset_dir.diff
+git apply skia_patch.diff
 
 git status
 

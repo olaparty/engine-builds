@@ -14,11 +14,9 @@ cd engine/src/flutter
 
 #ls -al shell/gpu
 
-git apply skia_patch.diff
-
-gclient sync --no-history -r
-
-git status
 cd engine/src/third_party/skia 
-git rev-list --max-parents=0 HEAD
+curl https://github.com/google/skia/commit/6f70deed3a8af62b2c0d0c69c481d2f5393339bf.diff -o patch.diff
+git apply patch.diff
+git status
+
 cd -

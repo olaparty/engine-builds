@@ -28,7 +28,7 @@ jobs:
         #   host_tag: android_arm64
 
         - tag: android_release
-          gn: --android --runtime-mode release --stripped
+          gn: --android --runtime-mode release --android-cpu=arm64 --stripped
           host: macos-latest
           host_tag: android_arm64
 

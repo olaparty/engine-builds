@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        channel: [3.3.2] # master
+        channel: [stable] # master
         config:
         # Debug builds not needed: fetched from Google
         # - tag: ios_profile
@@ -62,16 +62,6 @@ jobs:
         value=`date +%Y-%m-%d-%H-%M-%S`
         echo ::set-output name=build_time::$value
       shell: bash
-
-    - name: Create release
-      if: github.event_name != 'pull_request'
-      continue-on-error: true
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
-      with:
-        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
-        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
 
     # - name: Check release
     #   if: github.event_name != 'pull_request'
@@ -140,6 +130,16 @@ jobs:
       if: steps.release_check.outputs.skip_build != 'true' 
       run: tree ./engine/src/out/
       shell: bash
+
+    - name: Create release
+      if: github.event_name != 'pull_request'
+      continue-on-error: true
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
+      with:
+        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
+        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
 
     - name: Print release tree
       if: steps.release_check.outputs.skip_build != 'true' 

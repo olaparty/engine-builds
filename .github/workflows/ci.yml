@@ -63,16 +63,6 @@ jobs:
         echo ::set-output name=build_time::$value
       shell: bash
 
-    - name: Create release
-      if: github.event_name != 'pull_request'
-      continue-on-error: true
-      uses: actions/create-release@v1
-      env:
-        GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
-      with:
-        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
-        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
-
     # - name: Check release
     #   if: github.event_name != 'pull_request'
     #   id: release_check
@@ -145,6 +135,16 @@ jobs:
       if: steps.release_check.outputs.skip_build != 'true' 
       run: tree ./engine_out/
       shell: bash
+
+    - name: Create release
+      if: github.event_name != 'pull_request'
+      continue-on-error: true
+      uses: actions/create-release@v1
+      env:
+        GITHUB_TOKEN: ${{ secrets.PERMANENT_GITHUB_TOKEN }}
+      with:
+        tag_name: f-${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
+        release_name: Flutter Engine ${{ steps.get_engine_version.outputs.engine_version }}-${{ steps.get_build_time.outputs.build_time }}
 
     - name: Create release zip
       if: steps.release_check.outputs.skip_build != 'true' 

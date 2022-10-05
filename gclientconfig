@@ -4,7 +4,9 @@ solutions = [
     "name": "src/flutter",
     "url": "https://github.com/flutter/engine.git",
     "custom_deps": {
-        "src/third_party/libcxx": "https://llvm.googlesource.com/llvm-project/libcxx@44079a4cc04cdeffb9cfe8067bfb3c276fb2bab0"
+        "src": "https://github.com/flutter/buildroot.git@633907dfb90f6e8d97ad122aa66cf2d4207cda9b",
+        "src/third_party/libcxx": "https://llvm.googlesource.com/llvm-project/libcxx@44079a4cc04cdeffb9cfe8067bfb3c276fb2bab0",
+        "src/third_party/libcxxabi": "https://llvm.googlesource.com/llvm-project/libcxxabi@2ce528fb5e0f92e57c97ec3ff53b75359d33af12"
     },
     "deps_file": "DEPS",
     "safesync_url": "",

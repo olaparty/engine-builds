@@ -9,10 +9,10 @@ set -e
 # INCBIN(Icudtl, \"${PWD}/engine/src/third_party/icu/flutter/icudtl.dat\");
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
-cp patches/skia_patch.diff engine/src/flutter/
+cp patches/ios_emoji_textinput.diff engine/src/flutter/
 cd engine/src/flutter 
 
-#ls -al shell/gpu
+git apply ios_emoji_textinput.diff
 
 cd ../third_party/skia 
 curl https://github.com/google/skia/commit/6f70deed3a8af62b2c0d0c69c481d2f5393339bf.diff -o patch.diff

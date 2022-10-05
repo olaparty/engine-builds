@@ -13,6 +13,7 @@ cp patches/ios_emoji_textinput.diff engine/src/flutter/
 cd engine/src/flutter 
 
 git apply ios_emoji_textinput.diff
+git status
 
 cd ../third_party/skia 
 curl https://github.com/google/skia/commit/6f70deed3a8af62b2c0d0c69c481d2f5393339bf.diff -o patch.diff

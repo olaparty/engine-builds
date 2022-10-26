@@ -10,14 +10,17 @@ set -e
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
 cp patches/ios_emoji_textinput.diff engine/src/flutter/
+cp patches/skia_src_patch.diff engine/src/third_party/skia/
 cd engine/src/flutter 
 
 git apply ios_emoji_textinput.diff
 git status
 
 cd ../third_party/skia 
-curl https://github.com/google/skia/commit/6f70deed3a8af62b2c0d0c69c481d2f5393339bf.diff -o patch.diff
-git apply patch.diff
+#curl https://github.com/google/skia/commit/6f70deed3a8af62b2c0d0c69c481d2f5393339bf.diff -o patch.diff
+#git apply patch.diff
+git apply skia_src_patch.diff
+
 git status
 
 cd -

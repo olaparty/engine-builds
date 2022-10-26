@@ -40,7 +40,7 @@ index edb84821db..cf0629b299 100644
          paragraph->layout(this->width());
          paragraph->paint(canvas, 0, 0);
 diff --git a/modules/skparagraph/src/OneLineShaper.cpp b/modules/skparagraph/src/OneLineShaper.cpp
-index 482236a034..72aed0adb3 100644
+index 482236a034..31b69c43c4 100644
 --- a/modules/skparagraph/src/OneLineShaper.cpp
 +++ b/modules/skparagraph/src/OneLineShaper.cpp
 @@ -494,13 +494,30 @@ void OneLineShaper::matchResolvedFonts(const TextStyle& textStyle,
@@ -141,8 +141,33 @@ index 482236a034..72aed0adb3 100644
                      return Resolved::Everything;
                  } else if (resolvedCount < fResolvedBlocks.size()) {
                      return Resolved::Something;
-@@ -761,8 +781,8 @@ TextRange OneLineShaper::clusteredText(GlyphRange& glyphs) {
-     };
+@@ -736,33 +756,10 @@ TextRange OneLineShaper::clusteredText(GlyphRange& glyphs) {
+     enum class Dir { left, right };
+     enum class Pos { inclusive, exclusive };
+ 
+-    // [left: right)
+-    auto findBaseChar = [&](TextIndex index, Dir dir) -> TextIndex {
+-
+-        if (dir == Dir::right) {
+-            while (index < fCurrentRun->fTextRange.end) {
+-                if (this->fParagraph->codeUnitHasProperty(index,
+-                                                          CodeUnitFlags::kGraphemeStart)) {
+-                    return index;
+-                }
+-                ++index;
+-            }
+-            return fCurrentRun->fTextRange.end;
+-        } else {
+-            while (index > fCurrentRun->fTextRange.start) {
+-                if (this->fParagraph->codeUnitHasProperty(index,
+-                                                          CodeUnitFlags::kGraphemeStart)) {
+-                    return index;
+-                }
+-                --index;
+-            }
+-            return fCurrentRun->fTextRange.start;
+-        }
+-    };
  
      TextRange textRange(normalizeTextRange(glyphs));
 -    textRange.start = findBaseChar(textRange.start, Dir::left);

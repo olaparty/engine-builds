@@ -9,7 +9,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        channel: [stable] # master
+        channel: [2.10.5] # master
         config:
         # Debug builds not needed: fetched from Google
         # - tag: ios_profile

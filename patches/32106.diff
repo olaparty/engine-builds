@@ -1,0 +1,341 @@
+diff --git a/ci/licenses_golden/licenses_flutter b/ci/licenses_golden/licenses_flutter
+index ac1d7935f7..fbf1376837 100755
+--- a/ci/licenses_golden/licenses_flutter
++++ b/ci/licenses_golden/licenses_flutter
+@@ -123,7 +123,6 @@ FILE: ../../../flutter/flow/raster_cache_unittests.cc
+ FILE: ../../../flutter/flow/rtree.cc
+ FILE: ../../../flutter/flow/rtree.h
+ FILE: ../../../flutter/flow/rtree_unittests.cc
+-FILE: ../../../flutter/flow/skia_gpu_object.cc
+ FILE: ../../../flutter/flow/skia_gpu_object.h
+ FILE: ../../../flutter/flow/skia_gpu_object_unittests.cc
+ FILE: ../../../flutter/flow/surface.cc
+@@ -703,6 +702,7 @@ FILE: ../../../flutter/shell/common/display_manager.h
+ FILE: ../../../flutter/shell/common/engine.cc
+ FILE: ../../../flutter/shell/common/engine.h
+ FILE: ../../../flutter/shell/common/engine_unittests.cc
++FILE: ../../../flutter/shell/common/fixtures/hello_loop_2.gif
+ FILE: ../../../flutter/shell/common/fixtures/shell_test.dart
+ FILE: ../../../flutter/shell/common/fixtures/shelltest_screenshot.png
+ FILE: ../../../flutter/shell/common/input_events_unittests.cc
+@@ -728,6 +728,7 @@ FILE: ../../../flutter/shell/common/shell_benchmarks.cc
+ FILE: ../../../flutter/shell/common/shell_fuchsia_unittests.cc
+ FILE: ../../../flutter/shell/common/shell_io_manager.cc
+ FILE: ../../../flutter/shell/common/shell_io_manager.h
++FILE: ../../../flutter/shell/common/shell_io_manager_unittests.cc
+ FILE: ../../../flutter/shell/common/shell_test.cc
+ FILE: ../../../flutter/shell/common/shell_test.h
+ FILE: ../../../flutter/shell/common/shell_test_external_view_embedder.cc
+diff --git a/flow/BUILD.gn b/flow/BUILD.gn
+index 9312329a31..984e050b34 100644
+--- a/flow/BUILD.gn
++++ b/flow/BUILD.gn
+@@ -64,7 +64,6 @@ source_set("flow") {
+     "raster_cache_key.h",
+     "rtree.cc",
+     "rtree.h",
+-    "skia_gpu_object.cc",
+     "skia_gpu_object.h",
+     "surface.cc",
+     "surface.h",
+diff --git a/flow/skia_gpu_object.cc b/flow/skia_gpu_object.cc
+deleted file mode 100644
+index 7415916d77..0000000000
+--- a/flow/skia_gpu_object.cc
++++ /dev/null
+@@ -1,52 +0,0 @@
+-// Copyright 2013 The Flutter Authors. All rights reserved.
+-// Use of this source code is governed by a BSD-style license that can be
+-// found in the LICENSE file.
+-
+-#include "flutter/flow/skia_gpu_object.h"
+-
+-#include "flutter/fml/message_loop.h"
+-#include "flutter/fml/trace_event.h"
+-
+-namespace flutter {
+-
+-SkiaUnrefQueue::SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
+-                               fml::TimeDelta delay,
+-                               fml::WeakPtr<GrDirectContext> context)
+-    : task_runner_(std::move(task_runner)),
+-      drain_delay_(delay),
+-      drain_pending_(false),
+-      context_(context) {}
+-
+-SkiaUnrefQueue::~SkiaUnrefQueue() {
+-  FML_DCHECK(objects_.empty());
+-}
+-
+-void SkiaUnrefQueue::Unref(SkRefCnt* object) {
+-  std::scoped_lock lock(mutex_);
+-  objects_.push_back(object);
+-  if (!drain_pending_) {
+-    drain_pending_ = true;
+-    task_runner_->PostDelayedTask(
+-        [strong = fml::Ref(this)]() { strong->Drain(); }, drain_delay_);
+-  }
+-}
+-
+-void SkiaUnrefQueue::Drain() {
+-  TRACE_EVENT0("flutter", "SkiaUnrefQueue::Drain");
+-  std::deque<SkRefCnt*> skia_objects;
+-  {
+-    std::scoped_lock lock(mutex_);
+-    objects_.swap(skia_objects);
+-    drain_pending_ = false;
+-  }
+-
+-  for (SkRefCnt* skia_object : skia_objects) {
+-    skia_object->unref();
+-  }
+-
+-  if (context_ && skia_objects.size() > 0) {
+-    context_->performDeferredCleanup(std::chrono::milliseconds(0));
+-  }
+-}
+-
+-}  // namespace flutter
+diff --git a/flow/skia_gpu_object.h b/flow/skia_gpu_object.h
+index 38d29dcacd..7eb067d7dd 100644
+--- a/flow/skia_gpu_object.h
++++ b/flow/skia_gpu_object.h
+@@ -11,6 +11,7 @@
+ #include "flutter/fml/memory/ref_counted.h"
+ #include "flutter/fml/memory/weak_ptr.h"
+ #include "flutter/fml/task_runner.h"
++#include "flutter/fml/trace_event.h"
+ #include "third_party/skia/include/core/SkRefCnt.h"
+ #include "third_party/skia/include/gpu/GrDirectContext.h"
+ 
+@@ -18,16 +19,40 @@ namespace flutter {
+ 
+ // A queue that holds Skia objects that must be destructed on the given task
+ // runner.
+-class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
++template <class T>
++class UnrefQueue : public fml::RefCountedThreadSafe<UnrefQueue<T>> {
+  public:
+-  void Unref(SkRefCnt* object);
++  using ResourceContext = T;
++
++  void Unref(SkRefCnt* object) {
++    std::scoped_lock lock(mutex_);
++    objects_.push_back(object);
++    if (!drain_pending_) {
++      drain_pending_ = true;
++      task_runner_->PostDelayedTask(
++          [strong = fml::Ref(this)]() { strong->Drain(); }, drain_delay_);
++    }
++  }
+ 
+   // Usually, the drain is called automatically. However, during IO manager
+   // shutdown (when the platform side reference to the OpenGL context is about
+   // to go away), we may need to pre-emptively drain the unref queue. It is the
+   // responsibility of the caller to ensure that no further unrefs are queued
+   // after this call.
+-  void Drain();
++  void Drain() {
++    TRACE_EVENT0("flutter", "SkiaUnrefQueue::Drain");
++    std::deque<SkRefCnt*> skia_objects;
++    {
++      std::scoped_lock lock(mutex_);
++      objects_.swap(skia_objects);
++      drain_pending_ = false;
++    }
++    DoDrain(skia_objects, context_);
++  }
++
++  void UpdateResourceContext(sk_sp<ResourceContext> context) {
++    context_ = context;
++  }
+ 
+  private:
+   const fml::RefPtr<fml::TaskRunner> task_runner_;
+@@ -35,22 +60,47 @@ class SkiaUnrefQueue : public fml::RefCountedThreadSafe<SkiaUnrefQueue> {
+   std::mutex mutex_;
+   std::deque<SkRefCnt*> objects_;
+   bool drain_pending_;
+-  fml::WeakPtr<GrDirectContext> context_;
++  sk_sp<ResourceContext> context_;
+ 
+   // The `GrDirectContext* context` is only used for signaling Skia to
+   // performDeferredCleanup. It can be nullptr when such signaling is not needed
+   // (e.g., in unit tests).
+-  SkiaUnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
+-                 fml::TimeDelta delay,
+-                 fml::WeakPtr<GrDirectContext> context = {});
++  UnrefQueue(fml::RefPtr<fml::TaskRunner> task_runner,
++             fml::TimeDelta delay,
++             sk_sp<ResourceContext> context = nullptr)
++      : task_runner_(std::move(task_runner)),
++        drain_delay_(delay),
++        drain_pending_(false),
++        context_(context) {}
++
++  ~UnrefQueue() {
++    fml::TaskRunner::RunNowOrPostTask(
++        task_runner_, [objects = std::move(objects_),
++                       context = std::move(context_)]() mutable {
++          DoDrain(objects, context);
++          context.reset();
++        });
++  }
++
++  // static
++  static void DoDrain(const std::deque<SkRefCnt*>& skia_objects,
++                      sk_sp<ResourceContext> context) {
++    for (SkRefCnt* skia_object : skia_objects) {
++      skia_object->unref();
++    }
+ 
+-  ~SkiaUnrefQueue();
++    if (context && skia_objects.size() > 0) {
++      context->performDeferredCleanup(std::chrono::milliseconds(0));
++    }
++  }
+ 
+-  FML_FRIEND_REF_COUNTED_THREAD_SAFE(SkiaUnrefQueue);
+-  FML_FRIEND_MAKE_REF_COUNTED(SkiaUnrefQueue);
+-  FML_DISALLOW_COPY_AND_ASSIGN(SkiaUnrefQueue);
++  FML_FRIEND_REF_COUNTED_THREAD_SAFE(UnrefQueue);
++  FML_FRIEND_MAKE_REF_COUNTED(UnrefQueue);
++  FML_DISALLOW_COPY_AND_ASSIGN(UnrefQueue);
+ };
+ 
++using SkiaUnrefQueue = UnrefQueue<GrDirectContext>;
++
+ /// An object whose deallocation needs to be performed on an specific unref
+ /// queue. The template argument U need to have a call operator that returns
+ /// that unref queue.
+diff --git a/flow/skia_gpu_object_unittests.cc b/flow/skia_gpu_object_unittests.cc
+index faf0f3acec..cda91dd3f6 100644
+--- a/flow/skia_gpu_object_unittests.cc
++++ b/flow/skia_gpu_object_unittests.cc
+@@ -22,7 +22,7 @@ class TestSkObject : public SkRefCnt {
+                fml::TaskQueueId* dtor_task_queue_id)
+       : latch_(latch), dtor_task_queue_id_(dtor_task_queue_id) {}
+ 
+-  ~TestSkObject() {
++  virtual ~TestSkObject() {
+     if (dtor_task_queue_id_) {
+       *dtor_task_queue_id_ = fml::MessageLoop::GetCurrentTaskQueueId();
+     }
+@@ -34,6 +34,15 @@ class TestSkObject : public SkRefCnt {
+   fml::TaskQueueId* dtor_task_queue_id_;
+ };
+ 
++class TestResourceContext : public TestSkObject {
++ public:
++  TestResourceContext(std::shared_ptr<fml::AutoResetWaitableEvent> latch,
++                      fml::TaskQueueId* dtor_task_queue_id)
++      : TestSkObject(latch, dtor_task_queue_id) {}
++  ~TestResourceContext() = default;
++  void performDeferredCleanup(std::chrono::milliseconds msNotUsed) {}
++};
++
+ class SkiaGpuObjectTest : public ThreadTest {
+  public:
+   SkiaGpuObjectTest()
+@@ -127,5 +136,27 @@ TEST_F(SkiaGpuObjectTest, ObjectResetTwice) {
+   ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
+ }
+ 
++TEST_F(SkiaGpuObjectTest, UnrefResourceContextInTaskRunnerThread) {
++  std::shared_ptr<fml::AutoResetWaitableEvent> latch =
++      std::make_shared<fml::AutoResetWaitableEvent>();
++  fml::RefPtr<UnrefQueue<TestResourceContext>> unref_queue;
++  fml::TaskQueueId dtor_task_queue_id(0);
++  unref_task_runner()->PostTask([&]() {
++    auto resource_context =
++        sk_make_sp<TestResourceContext>(latch, &dtor_task_queue_id);
++    unref_queue = fml::MakeRefCounted<UnrefQueue<TestResourceContext>>(
++        unref_task_runner(), fml::TimeDelta::FromSeconds(0), resource_context);
++    latch->Signal();
++  });
++  latch->Wait();
++
++  // Delete the unref queue, it will schedule a task to unref the resource
++  // context in the task runner's thread.
++  unref_queue = nullptr;
++  latch->Wait();
++  // Verify that the resource context was destroyed in the task runner's thread.
++  ASSERT_EQ(dtor_task_queue_id, unref_task_runner()->GetTaskQueueId());
++}
++
+ }  // namespace testing
+ }  // namespace flutter
+diff --git a/shell/common/BUILD.gn b/shell/common/BUILD.gn
+index 62112b4b9d..7f679d2deb 100644
+--- a/shell/common/BUILD.gn
++++ b/shell/common/BUILD.gn
+@@ -156,7 +156,10 @@ if (enable_unittests) {
+   test_fixtures("shell_unittests_fixtures") {
+     dart_main = "fixtures/shell_test.dart"
+ 
+-    fixtures = [ "fixtures/shelltest_screenshot.png" ]
++    fixtures = [
++      "fixtures/shelltest_screenshot.png",
++      "fixtures/hello_loop_2.gif",
++    ]
+   }
+ 
+   shell_host_executable("shell_benchmarks") {
+@@ -288,6 +291,9 @@ if (enable_unittests) {
+         "$fuchsia_sdk_root/pkg:fidl_cpp",
+         "$fuchsia_sdk_root/pkg:sys_cpp",
+       ]
++    } else {
++      # TODO(63837): This test is hard-coded to use a TestGLSurface so it cannot run on fuchsia.
++      sources += [ "shell_io_manager_unittests.cc" ]
+     }
+   }
+ }
+diff --git a/shell/common/shell_io_manager.cc b/shell/common/shell_io_manager.cc
+index c8b6269001..ffec704cce 100644
+--- a/shell/common/shell_io_manager.cc
++++ b/shell/common/shell_io_manager.cc
+@@ -34,7 +34,8 @@ sk_sp<GrDirectContext> ShellIOManager::CreateCompatibleResourceLoadingContext(
+ ShellIOManager::ShellIOManager(
+     sk_sp<GrDirectContext> resource_context,
+     std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
+-    fml::RefPtr<fml::TaskRunner> unref_queue_task_runner)
++    fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
++    fml::TimeDelta unref_queue_drain_delay)
+     : resource_context_(std::move(resource_context)),
+       resource_context_weak_factory_(
+           resource_context_
+@@ -43,8 +44,8 @@ ShellIOManager::ShellIOManager(
+               : nullptr),
+       unref_queue_(fml::MakeRefCounted<flutter::SkiaUnrefQueue>(
+           std::move(unref_queue_task_runner),
+-          fml::TimeDelta::FromMilliseconds(8),
+-          GetResourceContext())),
++          unref_queue_drain_delay,
++          resource_context_)),
+       is_gpu_disabled_sync_switch_(is_gpu_disabled_sync_switch),
+       weak_factory_(this) {
+   if (!resource_context_) {
+@@ -81,6 +82,7 @@ void ShellIOManager::UpdateResourceContext(
+           ? std::make_unique<fml::WeakPtrFactory<GrDirectContext>>(
+                 resource_context_.get())
+           : nullptr;
++  unref_queue_->UpdateResourceContext(resource_context_);
+ }
+ 
+ fml::WeakPtr<ShellIOManager> ShellIOManager::GetWeakPtr() {
+diff --git a/shell/common/shell_io_manager.h b/shell/common/shell_io_manager.h
+index a6b0b5f137..5f59960eba 100644
+--- a/shell/common/shell_io_manager.h
++++ b/shell/common/shell_io_manager.h
+@@ -27,7 +27,9 @@ class ShellIOManager final : public IOManager {
+   ShellIOManager(
+       sk_sp<GrDirectContext> resource_context,
+       std::shared_ptr<const fml::SyncSwitch> is_gpu_disabled_sync_switch,
+-      fml::RefPtr<fml::TaskRunner> unref_queue_task_runner);
++      fml::RefPtr<fml::TaskRunner> unref_queue_task_runner,
++      fml::TimeDelta unref_queue_drain_delay =
++          fml::TimeDelta::FromMilliseconds(8));
+ 
+   ~ShellIOManager() override;
+ 

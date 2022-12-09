@@ -22,15 +22,15 @@ jobs:
         #   host: macos-latest
         #   host_tag: ios_arm64
 
-        - tag: android_release_arm64
-          gn: --android --runtime-mode release --android-cpu=arm64 --stripped
-          host: macos-latest
-          host_tag: android_arm64
-
-        # - tag: android_release
-        #   gn: --android --runtime-mode release --stripped
+        # - tag: android_release_arm64
+        #   gn: --android --runtime-mode release --android-cpu=arm64 --stripped
         #   host: macos-latest
-        #   host_tag: android_armv7
+        #   host_tag: android_arm64
+
+        - tag: android_release
+          gn: --android --runtime-mode release --stripped
+          host: macos-latest
+          host_tag: android_armv7
 
     runs-on: ${{ matrix.config.host }}
 

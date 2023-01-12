@@ -11,6 +11,7 @@ set -e
 
 # disable dart timeline
 sed -i '' -e "s/#define SUPPORT_TIMELINE 1/#define SUPPORT_TIMELINE 0/g"  engine/src/third_party/dart/runtime/vm/globals.h
+cat engine/src/third_party/dart/runtime/vm/globals.h
 
 #include "third_party/dart/runtime/include/dart_api.h"
 cp patches/32106.diff engine/src/flutter/

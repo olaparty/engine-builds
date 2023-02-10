@@ -10,7 +10,7 @@ set -e
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
 # disable dart timeline
-sed -i '' -e "s/#define SUPPORT_TIMELINE 1/#define SUPPORT_TIMELINE 0/g"  engine/src/third_party/dart/runtime/vm/globals.h
+sed -i '' '/SUPPORT_TIMELINE/d' engine/src/third_party/dart/runtime/vm/globals.h
 cat engine/src/third_party/dart/runtime/vm/globals.h | grep "SUPPORT_TIMELINE"
 
 #include "third_party/dart/runtime/include/dart_api.h"

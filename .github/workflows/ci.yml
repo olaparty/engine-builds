@@ -14,22 +14,22 @@ jobs:
         # Debug builds not needed: fetched from Google
         # - tag: ios_profile
         #   gn: --ios --runtime-mode profile --lto --no-build-web-sdk --disable-desktop-embeddings --no-build-glfw-shell --no-build-embedder-examples
-        #   host: macOS-14
+        #   host: macOS-15
         #   host_tag: ios_arm64
 
         - tag: ios_release
           gn: --ios --runtime-mode release --lto --stripped --no-build-web-sdk --disable-desktop-embeddings --no-build-glfw-shell --no-build-embedder-examples
-          host: macOS-14
+          host: macOS-15
           host_tag: ios_arm64
 
         # - tag: android_profile_arm64
         #   gn: --android --runtime-mode profile --android-cpu=arm64 --stripped
-        #   host: macOS-14
+        #   host: macOS-15
         #   host_tag: android_arm64
 
         # - tag: android_release
         #   gn: --android --runtime-mode release --lto --stripped
-        #   host: macOS-14
+        #   host: macOS-15
         #   host_tag: android_arm64
 
     runs-on: ${{ matrix.config.host }}
@@ -92,18 +92,18 @@ jobs:
       uses: actions/setup-python@v5
       with:
         python-version: '3.11'
-    - name: Install Xcode
-      if: steps.release_check.outputs.skip_build != 'true'
-      uses: maxim-lobanov/setup-xcode@v1
-      with:
-        xcode-version: '15.2.0'
+    # - name: Install Xcode
+    #   if: steps.release_check.outputs.skip_build != 'true'
+    #   uses: maxim-lobanov/setup-xcode@v1
+    #   with:
+    #     xcode-version: '15.2.0'
 
     - name: Install dependencies (ubuntu)
       if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'ubuntu-latest'
       run: sudo apt-get install patch tree zip
 
     - name: Install dependencies (macos)
-      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'macOS-14'
+      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'macOS-15'
       run: brew install binutils gpatch tree
 
     - name: Install depot tools

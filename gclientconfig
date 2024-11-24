@@ -3,7 +3,28 @@ solutions = [
     "managed": False,
     "name": "src/flutter",
     "url": "https://github.com/flutter/engine.git@1a65d409c7a1438a34d21b60bf30a6fd5db59314",
-    "custom_deps": {},
+    "custom_deps": {
+      "src/flutter/buildtools/mac-x64/clang": {
+        "packages": [
+          {
+            "package": "fuchsia/third_party/clang/mac-amd64",
+            "version": "git_revision:725656bdd885483c39f482a01ea25d67acf39c46" // replace with new clang version
+          }
+        ],
+        "condition": "host_os == \"mac\"",
+        "dep_type": "cipd"
+      },
+      "src/flutter/buildtools/mac-arm64/clang": {
+        "packages": [
+          {
+            "package": "fuchsia/third_party/clang/mac-arm64",
+            "version": "git_revision:725656bdd885483c39f482a01ea25d67acf39c46",
+          }
+        ],
+        "condition": "host_os == \"mac\" and host_cpu == \"arm64\"",
+        "dep_type": "cipd",
+      },
+    },
     "deps_file": "DEPS",
     "safesync_url": "",
   },

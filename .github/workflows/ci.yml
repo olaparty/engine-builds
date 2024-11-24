@@ -14,22 +14,22 @@ jobs:
         # Debug builds not needed: fetched from Google
         # - tag: ios_profile
         #   gn: --ios --runtime-mode profile --lto --no-build-web-sdk --disable-desktop-embeddings --no-build-glfw-shell --no-build-embedder-examples
-        #   host: macOS-13
+        #   host: macOS-15
         #   host_tag: ios_arm64
 
         - tag: ios_release
           gn: --ios --runtime-mode release --lto --stripped --no-build-web-sdk --disable-desktop-embeddings --no-build-glfw-shell --no-build-embedder-examples
-          host: macOS-13
+          host: macOS-15
           host_tag: ios_arm64
 
         # - tag: android_profile_arm64
         #   gn: --android --runtime-mode profile --android-cpu=arm64 --stripped
-        #   host: macOS-13
+        #   host: macOS-15
         #   host_tag: android_arm64
 
         # - tag: android_release
         #   gn: --android --runtime-mode release --lto --stripped
-        #   host: macOS-13
+        #   host: macOS-15
         #   host_tag: android_arm64
 
     runs-on: ${{ matrix.config.host }}
@@ -103,7 +103,7 @@ jobs:
       run: sudo apt-get install patch tree zip
 
     - name: Install dependencies (macos)
-      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'macOS-13'
+      if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'macOS-15'
       run: brew install binutils gpatch tree
 
     - name: Install depot tools

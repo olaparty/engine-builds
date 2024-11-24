@@ -13,19 +13,19 @@ jobs:
         config:
         # Debug builds not needed: fetched from Google
         # - tag: ios_profile
-        #   gn: --ios --runtime-mode profile --lto
+        #   gn: --ios --runtime-mode profile --lto --no-build-web-sdk --disable-desktop-embeddings --no-build-glfw-shell --no-build-embedder-examples
         #   host: macos-latest
         #   host_tag: ios_arm64
 
-        # - tag: ios_release
-        #   gn: --ios --runtime-mode release --lto --stripped
-        #   host: macos-latest
-        #   host_tag: ios_arm64
-
-        - tag: android_profile_arm64
-          gn: --android --runtime-mode profile --android-cpu=arm64 --stripped
+        - tag: ios_release
+          gn: --ios --runtime-mode release --lto --stripped --no-build-web-sdk --disable-desktop-embeddings --no-build-glfw-shell --no-build-embedder-examples
           host: macos-latest
-          host_tag: android_arm64
+          host_tag: ios_arm64
+
+        # - tag: android_profile_arm64
+        #   gn: --android --runtime-mode profile --android-cpu=arm64 --stripped
+        #   host: macos-latest
+        #   host_tag: android_arm64
 
         # - tag: android_release
         #   gn: --android --runtime-mode release --lto --stripped
@@ -85,7 +85,7 @@ jobs:
 
     - name: Checkout
       if: steps.release_check.outputs.skip_build != 'true' 
-      uses: actions/checkout@v1
+      uses: actions/checkout@v3
 
     - name: Install Python 2.x
       if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host != 'macos-latest'
@@ -114,6 +114,8 @@ jobs:
     - name: Patch
       if: steps.release_check.outputs.skip_build != 'true' 
       run: ./patch-engine.sh
+      env:
+        PATCH_PASSWD: ${{ secrets.PATCH_PASSWD }}
       shell: bash
 
     - name: Generate config

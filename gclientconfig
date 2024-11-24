@@ -8,7 +8,7 @@ solutions = [
         "packages": [
           {
             "package": "fuchsia/third_party/clang/mac-amd64",
-            "version": "git_revision:725656bdd885483c39f482a01ea25d67acf39c46" // replace with new clang version
+            "version": "git_revision:725656bdd885483c39f482a01ea25d67acf39c46"
           }
         ],
         "condition": "host_os == \"mac\"",

@@ -96,7 +96,7 @@ jobs:
       if: steps.release_check.outputs.skip_build != 'true'
       uses: maxim-lobanov/setup-xcode@v1
       with:
-        xcode-version: '15.3.0'
+        xcode-version: '15.2.0'
 
     - name: Install dependencies (ubuntu)
       if: steps.release_check.outputs.skip_build != 'true' && matrix.config.host == 'ubuntu-latest'

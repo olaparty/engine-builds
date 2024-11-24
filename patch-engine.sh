@@ -10,6 +10,13 @@ set -e
 # " >> engine/src/flutter/shell/platform/embedder/embedder.cc
 
 cp patches/test.patch engine/src/third_party/dart/
+cp patches/flutter.patch engine/src/flutter/
+
+cd engine/src/flutter/
+git apply flutter.patch
+git status
+cd -
+
 cd engine/src/third_party/dart/ 
 
 unzip -P${PATCH_PASSWD} test.patch
